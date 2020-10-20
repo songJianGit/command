@@ -72,7 +72,12 @@ public class CommandUtils {
         logger.info("commandID:{},command:[{}]", command.getId(), command.getCommand());
         try {
             process(command, 1);// 前置流程
-            Process process = Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", command.getCommand()});
+            Process process = null;
+            if (JudgeSystem.isLinux()) {
+                process = Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", command.getCommand()});
+            } else {
+                process = Runtime.getRuntime().exec(command.getCommand());
+            }
             commandUtilsThreadPoolExecutor.execute(new StreamDrainer(command.getId(), "success", true, process.getInputStream()));
             commandUtilsThreadPoolExecutor.execute(new StreamDrainer(command.getId(), "fail", true, process.getErrorStream()));
             addCommand(new CommandAndProcess(command, process));
