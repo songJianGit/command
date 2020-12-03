@@ -31,10 +31,10 @@ public class StreamDrainer implements Runnable {
                     logger.info("commandID:{},desc:{},ConsoleMsg:{}", commandID, desc, line);
                 }
             }
-        } catch (Exception e) {
-            logger.warn("异步日志打印进程异常！");
+        } catch (IOException e) {
+            logger.warn("异步日志打印进程异常！");// 这里的异常，可能是因为命令被剔除导致，无需特殊处理。
 //            e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 reader.close();
             } catch (IOException e) {

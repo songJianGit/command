@@ -25,7 +25,7 @@ public class ScheduledTask {
     public void consumption() {
         if (!brakeRigging()) return;
         initJdbcTemplate(jdbcTemplate);
-        logger.info("num:{},max:{}", CommandUtils.commandListSize(), CommandUtils.MAX_COMMAND_NUMBER);
+        logger.info("{}/{}", CommandUtils.commandListSize(), CommandUtils.MAX_COMMAND_NUMBER);
         List<Command> commandList = CommandUtils.CommandPassageway(commandList());
         CommandUtils.command(commandList);
     }

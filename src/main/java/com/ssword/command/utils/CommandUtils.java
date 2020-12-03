@@ -26,7 +26,7 @@ public class CommandUtils {
     public static List<Integer> command(List<Command> commands) {
         List<Integer> list = new ArrayList<>();
         for (Command command : commands) {
-            list.add(CommandUtils.command(command));
+            list.add(CommandUtils.commandV2(command));
         }
         return list;
     }
@@ -80,6 +80,40 @@ public class CommandUtils {
             }
             commandUtilsThreadPoolExecutor.execute(new StreamDrainer(command.getId(), "success", true, process.getInputStream()));
             commandUtilsThreadPoolExecutor.execute(new StreamDrainer(command.getId(), "fail", true, process.getErrorStream()));
+            addCommand(new CommandAndProcess(command, process));
+            process(command, 2);// 后置流程
+            return 0;
+        } catch (Exception e) {
+            logger.error("command error");
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    /**
+     * 运行成功后，将对应的Process存入PROCESS_LIST
+     *
+     * @param command
+     * @return
+     */
+    public static int commandV2(Command command) {
+        if (commandListSize() >= MAX_COMMAND_NUMBER) {
+            logger.error("maximum reached:{}", MAX_COMMAND_NUMBER);
+            return -1;
+        }
+        logger.info("commandID:{},command:[{}]", command.getId(), command.getCommand());
+        try {
+            process(command, 1);// 前置流程
+            ProcessBuilder pb = new ProcessBuilder();
+            pb.redirectErrorStream(true);// 重定向错误输出流到正常输出流
+            List<String> stringList = new ArrayList<>();
+            String[] cm = command.getCommand().split(" ");
+            for (String c : cm) {
+                stringList.add(c);// ProcessBuilder的命令，需要一个一个参数放进去
+            }
+            pb.command(stringList);
+            Process process = pb.start();// 启动进程
+            commandUtilsThreadPoolExecutor.execute(new StreamDrainer(command.getId(), "loginfo", true, process.getInputStream()));
             addCommand(new CommandAndProcess(command, process));
             process(command, 2);// 后置流程
             return 0;
