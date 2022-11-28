@@ -20,7 +20,10 @@ public class ProcessA extends ProcessBase {
 
     private void savePackinfo(Command command) {
         String sql = "INSERT INTO `command`.`t_packinfo` (`id`, `cdate`, `psize`, `port`, `remarks`) VALUES (?, ?, ?, ?, ?)";
-        Constant.jdbcTemplate.update(sql, UUIDUtils.uuid(), DateUtils.now(), getFileSize(command.getJsoninfo().path("fileurl").asText()), command.getPort(), command.getCommand());
+        long pSize = getFileSize(command.getJsoninfo().path("fileurl").asText());
+        if (pSize != 0) {
+            Constant.jdbcTemplate.update(sql, UUIDUtils.uuid(), DateUtils.now(), pSize, command.getPort(), command.getCommand());
+        }
     }
 
     public static long getFileSize(String fileurl) {
